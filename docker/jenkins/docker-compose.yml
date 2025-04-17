@@ -19,6 +19,7 @@ services:
       - CASC_JENKINS_CONFIG=${JENKINS_CASC_CONFIG}
       - CI_USER_PASSWORD=${JENKINS_CI_USER_PASSWORD}
       - DOCKER_CERT_PATH=${DOCKER_CLIENT_TLS_CERTDIR}
+      - JENKINS_AGENT_REMOTEFS=${JENKINS_AGENT_REMOTEFS}
       - JENKINS_DOCKER_AGENT_IMAGE_PATH=${JENKINS_DOCKER_AGENT_IMAGE_PATH}
     volumes:
       - jenkins_home:/var/jenkins_home
@@ -63,9 +64,14 @@ services:
     volumes:
       - dind_data:/var/lib/docker
       - jenkins_plugins:/var/jenkins_plugins
+      # Shared volume to make the Agent's filesystem visible to dind, so that the mount
+      # paths work fine for the containers which are starting inside the Agents, e.g. ansible container.
+      - jenkins_agent_dind_shared:${JENKINS_AGENT_REMOTEFS}
+      # This shared volume will be mounted in all the clients accessing dind or docker
+      - jenkins_docker_certs:${DOCKER_CLIENT_TLS_CERTDIR}
       - ./certs/registry.crt:/usr/local/share/ca-certificates/registry.crt:ro
-      - jenkins_docker_certs:${DOCKER_CLIENT_TLS_CERTDIR} # This shared volume will be mounted in all the clients accessing dind or docker
-    command: sh -c "update-ca-certificates && dockerd-entrypoint.sh"
+    # chown to ensure Jenkins agent can write to shared volume (owned by UID 1000, i.e. the Jenkins user)
+    command: sh -c "update-ca-certificates && chown -R 1000:1000 ${JENKINS_AGENT_REMOTEFS} && dockerd-entrypoint.sh"
     healthcheck:
       test: ["CMD", "sh", "-c", "docker version --format '{{.Server.Version}}' || exit 1"]
       interval: 5s
@@ -138,6 +144,27 @@ volumes:
   # And is required just for the "jenkins-sanity-check-pipeline" pipeline to verify that all the required plugins
   # are installed.
   jenkins_plugins:
+  # Mounting jenkins_agent_dind_shared volume to ${JENKINS_AGENT_REMOTEFS} path inside dind
+  # -----------------------------------------------------------------------------------
+  # Jenkins agents and DinD (Docker-in-Docker) containers operate in isolated contexts.
+  # The Jenkins agent writes files to ${JENKINS_AGENT_REMOTEFS} inside its own container,
+  # but DinD is a *separate container* and cannot see those files unless the path is shared.
+  # Due to that issue, when jenkins agents will try to spin up ansible container, it'll fail
+  # as it won't find the mounted files even though they exist on the agent filesystem. And that
+  # happens because dind can't see that filesystem and the mounts work according to the dind's filesyste.
+  #
+  # Solution:
+  # - Mount a shared named volume (jenkins_agent_dind_shared) to the *same path* inside both the agent
+  # and DinD containers.
+  # - In the Jenkins Docker Cloud config, we set `remoteFs: ${JENKINS_AGENT_REMOTEFS}`,
+  #   ensuring agents write to the shared path.
+  #
+  # This makes agent-generated files (e.g. Ansible inventories) visible to DinD-based
+  # builds or docker commands that need access to those artifacts.
+  #
+  # Without this shared mount, DinD would not see the agent’s filesystem and volume bind
+  # mounts like "type=bind,src=${JENKINS_AGENT_REMOTEFS},..." would fail at runtime.
+  jenkins_agent_dind_shared:
   registry_data:
   # Starting in 18.09+, the dind variants of this image will automatically generate TLS certificates in the directory
   # specified by the DOCKER_TLS_CERTDIR environment variable.

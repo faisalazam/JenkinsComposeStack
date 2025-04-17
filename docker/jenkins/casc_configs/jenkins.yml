@@ -47,7 +47,7 @@ jenkins:
           - &base-template  # Define a reusable template
             name: "agent-template"
             pullTimeout: 171
-            remoteFs: "/home/jenkins/agent"
+            remoteFs: "${JENKINS_AGENT_REMOTEFS}"
             labelString: "docker-agent alpine jdk21 alpine-jdk21 git-2.43"
             instanceCapStr: "2"  # Limit max agents that can be launched from this specific agent template.
             retentionStrategy:
@@ -80,6 +80,7 @@ jenkins:
                 # Since agents are running inside dind, all their mount paths must be relative
                 # to the dind container’s filesystem.
                 - "type=bind,src=${DOCKER_CERT_PATH},dst=${DOCKER_CERT_PATH},readonly"
+                - "type=bind,src=${JENKINS_AGENT_REMOTEFS},dst=${JENKINS_AGENT_REMOTEFS}"
               environment:
                 # This tells Docker CLI commands running inside the agent container where to find the Docker daemon.
                 # In Docker-in-Docker (DinD) setups, the actual Docker daemon runs inside the dind container.
