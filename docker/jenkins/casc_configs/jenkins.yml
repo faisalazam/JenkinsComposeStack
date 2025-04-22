@@ -7,10 +7,3 @@ jenkins:
 
   # Set the number of executors (parallel builds)
   numExecutors: 0
-
-  # Set global environment variables
-  globalNodeProperties:
-    - envVars:
-        env:
-          - key: TEST_VARIABLE
-            value: "Hello World"

@@ -1,0 +1,7 @@
+jenkins:
+  # Set global environment variables
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: TEST_VARIABLE
+            value: "Hello World"
