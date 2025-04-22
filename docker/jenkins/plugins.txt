@@ -9,7 +9,7 @@ configuration-as-code:1953.v148f87d74b_1e       # Jenkins as Code (JCasC)
 job-dsl:1.92                                    # Programmatically create jobs
 pipeline-utility-steps:2.19.0                   # Read/write files, manipulate parameters
 uno-choice:2.8.6                                # active-choices - Dynamic dropdowns (populate from files)
-extensible-choice-parameter:237.v51568f37b_78e
+extensible-choice-parameter:237.v51568f37b_78e  # Extended dropdowns with Groovy/script support
 
 # Docker & Infrastructure
 docker-workflow:611.v16e84da_6d3ff              # Run builds inside Docker containers
@@ -21,4 +21,6 @@ credentials-binding:687.v619cb_15e923f          # Store and use secrets safely
 # Logging & Timestamps
 timestamper:1.28                                # Adds timestamps to job logs
 
-docker-plugin:1274.vc0203fdf2e74                #  Allows containers to be dynamically provisioned as Jenkins agents using Docker
+docker-plugin:1274.vc0203fdf2e74                # Allows containers to be dynamically provisioned as Jenkins agents using Docker
+
+envinject:2.926.v69c9b_3896a_96                 # This plugin makes it possible to setup a custom environment for your jobs.
