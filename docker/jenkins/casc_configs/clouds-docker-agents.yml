@@ -1,0 +1,62 @@
+jenkins:
+  clouds:
+    - docker:
+        # For reference: http://localhost:8080/manage/configuration-as-code/reference#Cloud-docker
+        name: "Docker"
+        containerCap: 5  # Global Limit for the Cloud -maximum number of running containers for this entire Docker cloud.
+        errorDuration: 313
+        dockerApi:
+          dockerHost:
+            credentialsId: "docker_tls_certificate"
+            uri: "${DOCKER_DAEMON_URL}"  # Agents need Docker access - points agents to dind container
+          readTimeout: 120
+          connectTimeout: 60
+        templates:
+          - &base-template  # Define a reusable template
+            name: "agent-template"
+            pullTimeout: 171
+            remoteFs: "${JENKINS_AGENT_REMOTEFS}"
+            labelString: "docker-agent alpine jdk21 alpine-jdk21 git-2.43"
+            instanceCapStr: "2"  # Limit max agents that can be launched from this specific agent template.
+            retentionStrategy:
+              idleMinutes: 1  # Number of minutes of idleness after which to kill the agent
+            dockerTemplateBase: &common-docker-template-base  # Define a reusable template
+              memorySwap: 0  # Disables swap, preventing memory overuse.
+              memoryLimit: 512m  # Restricts agent container memory usage to 512MB.
+              image: "jenkins/inbound-agent:jdk21"
+            connector:
+              attach:
+                user: "jenkins"
+          - <<: *base-template  # Reuse the base template override the fields with different values
+            name: "agent-on-hostnet-template"
+            labelString: "agent-on-hostnet alpine jdk21 alpine-jdk21 git-2.43"
+            dockerTemplateBase:
+              <<: *common-docker-template-base  # Reuse the base template override the fields with different values
+              network: host  # To allow access to the host network
+              mounts:
+                # Since agents are running inside dind, all their mount paths must be relative
+                # to the dind container’s filesystem.
+                - "type=bind,src=/var/jenkins_plugins/plugins.txt,dst=/home/jenkins/agent/plugins/plugins.txt"
+          - <<: *base-template  # Reuse the base template override the fields with different values
+            name: "docker-agent-on-hostnet-template"
+            labelString: "docker-agent-on-hostnet alpine jdk21 alpine-jdk21 git-2.43"
+            dockerTemplateBase:
+              <<: *common-docker-template-base  # Reuse the base template override the fields with different values
+              image: "${JENKINS_DOCKER_AGENT_IMAGE_PATH}"
+              network: host  # To allow access to the host network
+              mounts:
+                # Since agents are running inside dind, all their mount paths must be relative
+                # to the dind container’s filesystem.
+                #                - "type=bind,src=${JENKINS_AGENT_REMOTEFS}/SymbioDeployHub,dst=${JENKINS_AGENT_REMOTEFS}/SymbioDeployHub"
+                - "type=bind,src=${DOCKER_CERT_PATH},dst=${DOCKER_CERT_PATH},readonly"
+                - "type=bind,src=${JENKINS_AGENT_REMOTEFS},dst=${JENKINS_AGENT_REMOTEFS}"
+              environment:
+                # This tells Docker CLI commands running inside the agent container where to find the Docker daemon.
+                # In Docker-in-Docker (DinD) setups, the actual Docker daemon runs inside the dind container.
+                # Other containers (such as Jenkins agents) cannot access the Docker daemon by default because
+                # they are separate processes.
+                # By setting DOCKER_HOST=${DOCKER_DAEMON_URL}, the container is instructed to send all Docker commands
+                # to the dind service running at ${DOCKER_DAEMON_URL}
+                - "DOCKER_HOST=${DOCKER_DAEMON_URL}" # points agents to dind container
+                - "DOCKER_TLS_VERIFY=1"
+                - "DOCKER_CERT_PATH=${DOCKER_CERT_PATH}"
