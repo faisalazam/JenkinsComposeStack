@@ -1,0 +1,8 @@
+unclassified:
+  timestamper:
+    allPipelines: true
+    systemTimeFormat: "yyyy-MM-dd HH:mm:ss.SSS"
+  location:
+    url: "http://localhost:8080/"
+  mailer:
+    smtpHost: "smtp.example.com"

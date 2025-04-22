@@ -30,25 +30,3 @@ jenkins:
   authorizationStrategy:
     loggedInUsersCanDoAnything:
       allowAnonymousRead: false
-
-credentials:
-  system:
-    domainCredentials:
-      - credentials:
-          - x509ClientCert:
-              scope: SYSTEM
-              id: "docker_tls_certificate"
-              # TODO: Note: these will be visible in http://localhost:8080/manage/configuration-as-code/viewExport
-              # Is that fine? Think about it.
-              clientKeySecret: "${readFile:${DOCKER_CERT_PATH}/key.pem}"
-              clientCertificate: "${readFile:${DOCKER_CERT_PATH}/cert.pem}"
-              serverCaCertificate: "${readFile:${DOCKER_CERT_PATH}/ca.pem}"
-
-unclassified:
-  timestamper:
-    allPipelines: true
-    systemTimeFormat: "yyyy-MM-dd HH:mm:ss.SSS"
-  location:
-    url: "http://localhost:8080/"
-  mailer:
-    smtpHost: "smtp.example.com"
