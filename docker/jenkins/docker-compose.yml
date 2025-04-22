@@ -25,7 +25,7 @@ services:
       - jenkins_home:/var/jenkins_home
       - jenkins_plugins:/usr/share/jenkins/ref
       - jenkins_docker_certs:${DOCKER_CLIENT_TLS_CERTDIR}:ro # This shared volume will be mounted in all the clients accessing dind or docker
-      - ./casc_configs/jenkins.yml:/var/jenkins_home/casc_configs/jenkins.yml
+      - ./casc_configs:/var/jenkins_home/casc_configs
     networks:
       - jenkins_network
     depends_on:
