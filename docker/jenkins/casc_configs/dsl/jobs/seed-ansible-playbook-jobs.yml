@@ -14,7 +14,7 @@ jobs:
           jobDsl {
             lookupStrategy("SEED_JOB")
             removedJobAction("DELETE")
-            targets("jenkins/jobdsl/generate-ansible-jobs.groovy")
+            targets("jenkins/jobdsl/generate_ansible_jobs.groovy")
           }
         }
       }
