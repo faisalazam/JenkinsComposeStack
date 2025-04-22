@@ -1,0 +1,20 @@
+jobs:
+  - script: >
+      job("seed-ansible-jobs") {
+        description("Seeds Jenkins jobs for Ansible playbooks from SymbioDeployHub")
+        scm {
+          git {
+            remote {
+              url("https://gitlab.com/mnf-group/tiab/octane-sys-eng/symbiodeployhub.git")
+            }
+            branch("stable")
+          }
+        }
+        steps {
+          jobDsl {
+            lookupStrategy("SEED_JOB")
+            removedJobAction("DELETE")
+            targets("jenkins/jobdsl/generate-ansible-jobs.groovy")
+          }
+        }
+      }

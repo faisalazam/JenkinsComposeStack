@@ -18,6 +18,7 @@ casc_configs/
 └— dsl/
     └— jobs/
         └— jenkins-sanity-check-pipeline.yml  # Job DSL in YAML format
+        └— seed-ansible-playbook-jobs.yml     # Seed Job DSL to generate pipeline for Ansible Playbooks
 ```
 
 ---
