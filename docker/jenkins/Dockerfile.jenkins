@@ -15,8 +15,8 @@ COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
 
 # Set up JCasC environment variable
-COPY casc_configs/jenkins.yml /var/jenkins_home/casc_configs/jenkins.yml
-ENV CASC_JENKINS_CONFIG=/var/jenkins_home/casc_configs/jenkins.yml
+COPY casc_configs /var/jenkins_home/casc_configs
+ENV CASC_JENKINS_CONFIG=/var/jenkins_home/casc_configs
 
 # Ensure correct permissions for Jenkins home directory
 RUN chown -R jenkins:jenkins /var/jenkins_home /usr/share/jenkins/ref
