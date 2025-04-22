@@ -1,0 +1,16 @@
+jenkins:
+  # Security settings (disable first-run setup wizard)
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          name: "Administrator"
+          password: "${ADMIN_PASSWORD}"
+        - id: "ci_user"
+          name: "CI_User"
+          password: "${CI_USER_PASSWORD}"
+
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
