@@ -75,7 +75,7 @@ services:
       - jenkins_docker_certs:${DOCKER_CLIENT_TLS_CERTDIR}
       - ./certs/registry.crt:/usr/local/share/ca-certificates/registry.crt:ro
     # chown to ensure Jenkins agent can write to shared volume (owned by UID 1000, i.e. the Jenkins user)
-    command: sh -c "update-ca-certificates && chown -R 1000:1000 ${JENKINS_AGENT_WORKSPACE_DIR} && dockerd-entrypoint.sh"
+    command: sh -c "update-ca-certificates && chown -R 1000:1000 ${JENKINS_AGENT_WORKSPACE_DIR} ${JENKINS_AGENT_SHARED_METADATA_DIR} && dockerd-entrypoint.sh"
     healthcheck:
       test: ["CMD", "sh", "-c", "docker version --format '{{.Server.Version}}' || exit 1"]
       interval: 5s
