@@ -1,21 +1,19 @@
 jobs:
   - script: >
-      job("seed-ansible-jobs") {
-        description("Seeds Jenkins jobs for Ansible playbooks from SymbioDeployHub")
-        scm {
-          git {
-            remote {
-              credentials("jenkins-rsa-key")
-              url("https://gitlab.com/mnf-group/tiab/octane-sys-eng/symbiodeployhub.git")
+      pipelineJob("metadata-and-seed-job-generator") {
+        description("Generates metadata and seeds Jenkins jobs based on Ansible playbooks from SymbioDeployHub")
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  credentials("jenkins-rsa-key")
+                  url("https://gitlab.com/mnf-group/tiab/octane-sys-eng/symbiodeployhub.git")
+                }
+                branches("stable")
+              }
             }
-            branch("stable")
-          }
-        }
-        steps {
-          jobDsl {
-            lookupStrategy("SEED_JOB")
-            removedJobAction("DELETE")
-            targets("jenkins/jobdsl/generate_ansible_jobs.groovy")
+            scriptPath("jenkins/metadata-and-seed-job-generator/Jenkinsfile")
           }
         }
       }
