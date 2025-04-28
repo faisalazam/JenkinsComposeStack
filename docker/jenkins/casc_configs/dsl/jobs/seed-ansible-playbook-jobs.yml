@@ -2,6 +2,9 @@ jobs:
   - script: >
       pipelineJob("metadata-and-seed-job-generator") {
         description("Generates metadata and seeds Jenkins jobs based on Ansible playbooks from SymbioDeployHub")
+        environmentVariables {
+          env('JENKINS_AGENT_SHARED_METADATA_DIR', "${JENKINS_AGENT_SHARED_METADATA_DIR}")
+        }
         definition {
           cpsScm {
             scm {
