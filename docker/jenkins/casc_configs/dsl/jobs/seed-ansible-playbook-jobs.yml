@@ -1,7 +1,17 @@
 jobs:
   - script: >
       pipelineJob("metadata-and-seed-job-generator") {
-        description("Generates metadata and seeds Jenkins jobs based on Ansible playbooks from SymbioDeployHub")
+        description("""
+          Generates metadata and seeds Jenkins jobs based on Ansible playbooks from SymbioDeployHub.
+
+            - This pipeline generates the Application-Environment Map (JSON) based on the directory structure of Ansible inventory.
+            - The generated JSON will be used to populate dropdowns dynamically for job configuration.
+            - It also generates a Playbook List (TXT) by scanning the available Ansible playbooks.
+            - The Playbook List file will be used by the seed job to create separate pipelines for each playbook.
+            - Finally, this pipeline uses the generated metadata to dynamically create new Jenkins jobs for each playbook.
+            - The generated files (JSON, TXT) and new jobs are saved at shared locations accessible across Jenkins agents.
+        """)
+
         environmentVariables {
           env('JENKINS_AGENT_SHARED_METADATA_DIR', "${JENKINS_AGENT_SHARED_METADATA_DIR}")
         }
