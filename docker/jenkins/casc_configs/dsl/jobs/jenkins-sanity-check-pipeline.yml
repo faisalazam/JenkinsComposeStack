@@ -14,6 +14,12 @@ jobs:
 
           This helps ensure that the build environment is correctly set up before executing further tasks.
         """)
+
+        // Prevents concurrent builds of this job
+        properties {
+          disableConcurrentBuilds()
+        }
+
         definition {
           cps {
             script("""

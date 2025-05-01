@@ -12,6 +12,11 @@ jobs:
             - The generated files (JSON, TXT) and new jobs are saved at shared locations accessible across Jenkins agents.
         """)
 
+        // Prevents concurrent builds of this job
+        properties {
+          disableConcurrentBuilds()
+        }
+
         environmentVariables {
           env('JENKINS_AGENT_SHARED_METADATA_DIR', "${JENKINS_AGENT_SHARED_METADATA_DIR}")
         }
