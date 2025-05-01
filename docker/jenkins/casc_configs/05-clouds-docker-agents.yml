@@ -40,7 +40,7 @@ jenkins:
               mounts:
                 # Since agents are running inside dind, all their mount paths must be relative
                 # to the dind container’s filesystem.
-                - "type=bind,src=/var/jenkins_plugins/plugins.txt,dst=/home/jenkins/agent/plugins/plugins.txt"
+                - "type=bind,src=${JENKINS_AGENT_SHARED_METADATA_DIR}/plugins.txt,dst=/home/jenkins/agent/plugins/plugins.txt"
           - <<: *base-template  # Reuse the base template override the fields with different values
             name: "docker-agent-on-hostnet-template"
             labelString: "docker-agent-on-hostnet alpine jdk21 alpine-jdk21 git-2.43"

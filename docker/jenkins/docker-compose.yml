@@ -76,7 +76,7 @@ services:
       # So the ./plugins.txt is mounted in the Dind container to mount in the Jenkins' agents later
       # The ./plugins.txt mount is required just for the "jenkins-sanity-check-pipeline" pipeline
       # to verify that all the required plugins are installed.
-      - ./plugins.txt:/var/jenkins_plugins/plugins.txt
+      - ./plugins.txt:${JENKINS_AGENT_SHARED_METADATA_DIR}/plugins.txt
       - ./certs/registry.crt:/usr/local/share/ca-certificates/registry.crt:ro
     # chown to ensure Jenkins agent can write to shared volume (owned by UID 1000, i.e. the Jenkins user)
     command: sh -c "update-ca-certificates && chown -R 1000:1000 ${JENKINS_AGENT_WORKSPACE_DIR} ${JENKINS_AGENT_SHARED_METADATA_DIR} && dockerd-entrypoint.sh"
