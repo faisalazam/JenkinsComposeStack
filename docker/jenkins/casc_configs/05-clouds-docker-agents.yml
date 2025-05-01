@@ -17,12 +17,13 @@ jenkins:
             pullTimeout: 171
             remoteFs: "${JENKINS_AGENT_REMOTEFS}"
             labelString: "docker-agent alpine jdk21 alpine-jdk21 git-2.43"
+            mode: NORMAL # Use this node as much as possible
             instanceCapStr: "2"  # Limit max agents that can be launched from this specific agent template.
             retentionStrategy:
               idleMinutes: 1  # Number of minutes of idleness after which to kill the agent
             dockerTemplateBase: &common-docker-template-base  # Define a reusable template
               memorySwap: 0  # Disables swap, preventing memory overuse.
-              memoryLimit: 512m  # Restricts agent container memory usage to 512MB.
+              memoryLimit: 512  # Do not specify unit. Restricts agent container memory usage in MBs, i.e. 512MB.
               image: "jenkins/inbound-agent:jdk21"
               mounts:
                 # Mounting the ${JENKINS_AGENT_SHARED_METADATA_DIR} to make the shared path visible/accessible
@@ -34,6 +35,7 @@ jenkins:
           - <<: *base-template  # Reuse the base template override the fields with different values
             name: "agent-on-hostnet-template"
             labelString: "agent-on-hostnet alpine jdk21 alpine-jdk21 git-2.43"
+            mode: EXCLUSIVE # Only build jobs with label expressions matching this node
             dockerTemplateBase:
               <<: *common-docker-template-base  # Reuse the base template override the fields with different values
               network: host  # To allow access to the host network
@@ -44,6 +46,7 @@ jenkins:
           - <<: *base-template  # Reuse the base template override the fields with different values
             name: "docker-agent-on-hostnet-template"
             labelString: "docker-agent-on-hostnet alpine jdk21 alpine-jdk21 git-2.43"
+            mode: EXCLUSIVE # Only build jobs with label expressions matching this node
             dockerTemplateBase:
               <<: *common-docker-template-base  # Reuse the base template override the fields with different values
               image: "${JENKINS_DOCKER_AGENT_IMAGE_PATH}"
