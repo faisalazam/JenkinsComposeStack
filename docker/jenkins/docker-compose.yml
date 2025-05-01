@@ -25,9 +25,9 @@ services:
       - JENKINS_AGENT_SHARED_METADATA_DIR=${JENKINS_AGENT_SHARED_METADATA_DIR}
     volumes:
       - jenkins_home:/var/jenkins_home
-      - jenkins_plugins:/usr/share/jenkins/ref
       - jenkins_docker_certs:${DOCKER_CLIENT_TLS_CERTDIR}:ro # This shared volume will be mounted in all the clients accessing dind or docker
       - ./casc_configs:/var/jenkins_home/casc_configs
+      - ./plugins.txt:/usr/share/jenkins/ref/plugins.txt
       - jenkins_agent_dind_metadata_shared:${JENKINS_AGENT_SHARED_METADATA_DIR}:ro
     networks:
       - jenkins_network
@@ -66,13 +66,17 @@ services:
       - DOCKER_TLS_CERTDIR=${DOCKER_TLS_CERTDIR}
     volumes:
       - dind_data:/var/lib/docker
-      - jenkins_plugins:/var/jenkins_plugins
       # Shared volume to make the Agent's filesystem visible to dind, so that the mount
       # paths work fine for the containers which are starting inside the Agents, e.g. ansible container.
       - jenkins_agent_dind_workspace_shared:${JENKINS_AGENT_WORKSPACE_DIR}
       - jenkins_agent_dind_metadata_shared:${JENKINS_AGENT_SHARED_METADATA_DIR}
       # This shared volume will be mounted in all the clients accessing dind or docker
       - jenkins_docker_certs:${DOCKER_CLIENT_TLS_CERTDIR}
+      # Since agents are spawn inside dind, all their mount paths must be relative to the dind container’s filesystem.
+      # So the ./plugins.txt is mounted in the Dind container to mount in the Jenkins' agents later
+      # The ./plugins.txt mount is required just for the "jenkins-sanity-check-pipeline" pipeline
+      # to verify that all the required plugins are installed.
+      - ./plugins.txt:/var/jenkins_plugins/plugins.txt
       - ./certs/registry.crt:/usr/local/share/ca-certificates/registry.crt:ro
     # chown to ensure Jenkins agent can write to shared volume (owned by UID 1000, i.e. the Jenkins user)
     command: sh -c "update-ca-certificates && chown -R 1000:1000 ${JENKINS_AGENT_WORKSPACE_DIR} ${JENKINS_AGENT_SHARED_METADATA_DIR} && dockerd-entrypoint.sh"
@@ -143,11 +147,6 @@ services:
 volumes:
   dind_data:
   jenkins_home:
-  # Sharing the jenkins_plugins volume between Jenkins and the Dind containers to mount in the Jenkins' agents
-  # Since agents are spawn inside dind, all their mount paths must be relative to the dind container’s filesystem.
-  # And is required just for the "jenkins-sanity-check-pipeline" pipeline to verify that all the required plugins
-  # are installed.
-  jenkins_plugins:
   # Mounting jenkins_agent_dind_workspace_shared volume to ${JENKINS_AGENT_WORKSPACE_DIR} path inside dind
   # -----------------------------------------------------------------------------------
   # Jenkins agents and DinD (Docker-in-Docker) containers operate in isolated contexts.
