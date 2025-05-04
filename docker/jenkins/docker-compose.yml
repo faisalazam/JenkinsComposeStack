@@ -47,11 +47,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${JENKINS_CPU_LIMIT}"        # Limit Jenkins to 2 CPU cores
-          memory: "${JENKINS_MEMORY_LIMIT}"   # Max 4GB RAM for Jenkins
+          cpus: "${JENKINS_CPU_LIMIT}"
+          memory: "${JENKINS_MEMORY_LIMIT}"
         reservations:
-          cpus: "${JENKINS_CPU_RESERVATION}"       # Ensure at least 1 CPU is reserved
-          memory: "${JENKINS_MEMORY_RESERVATION}"  # Ensure at least 2GB RAM is reserved
+          cpus: "${JENKINS_CPU_RESERVATION}"
+          memory: "${JENKINS_MEMORY_RESERVATION}"
 
   dind:
     # The Docker daemon running in docker:dind, and Jenkins' agents will send docker commands here...
@@ -90,11 +90,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${DIND_CPU_LIMIT}"        # Limit dind to 2 CPU cores
-          memory: "${DIND_MEMORY_LIMIT}"   # Max 4GB RAM for dind
+          cpus: "${DIND_CPU_LIMIT}"
+          memory: "${DIND_MEMORY_LIMIT}"
         reservations:
-          cpus: "${DIND_CPU_RESERVATION}"        # Ensure at least 1 CPU is reserved
-          memory: "${DIND_MEMORY_RESERVATION}"   # Ensure at least 2GB RAM is reserved
+          cpus: "${DIND_CPU_RESERVATION}"
+          memory: "${DIND_MEMORY_RESERVATION}"
 
   registry:
     image: distribution/distribution:3.0.0-rc.4
@@ -119,6 +119,14 @@ services:
       interval: 10s
       retries: 5
       start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "${REGISTRY_CPU_LIMIT}"
+          memory: "${REGISTRY_MEMORY_LIMIT}"
+        reservations:
+          cpus: "${REGISTRY_CPU_RESERVATION}"
+          memory: "${REGISTRY_MEMORY_RESERVATION}"
 
   builder:
     image: docker:28.0.2-cli
