@@ -1,3 +1,6 @@
 /.idea/
 /docker/jenkins/certs/
 /docker/jenkins/secrets/
+
+# This file is generated externally, i.e. from SymbioDeployHub
+/docker/jenkins/casc_configs/03b-credentials-secrets.yml
