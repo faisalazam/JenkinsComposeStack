@@ -3,12 +3,12 @@ blueocean:1.27.19
 
 # Core functionality
 workflow-aggregator:608.v67378e9d3db_1          # Full Pipeline (Jenkinsfile) support
-configuration-as-code:1958.vddc0d369b_e16       # Jenkins as Code (JCasC)
+configuration-as-code:1963.v24e046127a_3f       # Jenkins as Code (JCasC)
 
 # UI & Parameterized Jobs (Dropdowns)
 job-dsl:1.92                                    # Programmatically create jobs
 pipeline-utility-steps:2.19.0                   # Read/write files, manipulate parameters
-uno-choice:2.8.7                                # active-choices - Dynamic dropdowns (populate from files)
+uno-choice:2.8.8                                # active-choices - Dynamic dropdowns (populate from files)
 
 # Docker & Infrastructure
 docker-workflow:611.v16e84da_6d3ff              # Run builds inside Docker containers
