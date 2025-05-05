@@ -7,3 +7,6 @@ jenkins:
 
   # Set the number of executors (parallel builds)
   numExecutors: 0
+
+  # TCP port to communicate with agents connected inbound. Set it to 0 for random port
+  slaveAgentPort: ${JENKINS_AGENT_PORT}
