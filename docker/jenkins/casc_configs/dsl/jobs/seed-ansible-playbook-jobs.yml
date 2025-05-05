@@ -26,7 +26,7 @@ jobs:
               git {
                 remote {
                   credentials("jenkins-rsa-key")
-                  url("https://gitlab.com/mnf-group/tiab/octane-sys-eng/symbiodeployhub.git")
+                  url("git@gitlab.com:mnf-group/tiab/octane-sys-eng/symbiodeployhub.git")
                 }
                 branches("stable")
               }
