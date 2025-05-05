@@ -11,7 +11,7 @@ reproducible Jenkins instances using version-controlled YAML files.
 casc_configs/
 ├— 01-jenkins.yml                # Core Jenkins settings
 ├— 02-security.yml               # Security realm and authorization settings
-├— 03-credentials.yml            # Jenkins credentials (e.g., Docker TLS certs)
+├— 03a-credentials-base.yml      # Jenkins credentials (e.g., Docker TLS certs)
 ├— 04-global-config.yml          # Global environment variables and node properties
 ├— 05-clouds-docker-agents.yml   # Docker cloud and agent templates
 ├— 06-unclassified.yml           # Plugin-specific and miscellaneous settings
