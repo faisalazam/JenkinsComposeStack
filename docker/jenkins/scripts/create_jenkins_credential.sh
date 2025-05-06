@@ -12,6 +12,8 @@
 #
 # In contrast, this script avoids leaving secrets in config files or exposing them via web endpoints,
 # making it a safer (though not perfect) approach for managing Jenkins credentials.
+#
+# DO NOT FORGET TO RUN `scripts/generate_token.sh` BEFORE RUNNING THIS SCRIPT TO GENERATE API TOKEN...
 
 # Helper: Print usage
 usage() {
@@ -36,6 +38,10 @@ usage() {
   echo "For SSHPrivateKey:"
   echo "  --username        SSH username"
   echo "  --private-key     SSH private key string"
+  echo ""
+  echo ""
+  echo "Optional:"
+  echo "  --recreate-if-exists If true, will delete the existing credential and then create"
   echo ""
   exit 1
 }
@@ -88,9 +94,12 @@ for arg in "$@"; do
     --password=*) CREDENTIALS_PASSWORD="${arg#*=}" ;;
     --secret=*) CREDENTIALS_SECRET="${arg#*=}" ;;
     --private-key=*) CREDENTIALS_PRIVATE_KEY="${arg#*=}" ;;
+    --recreate-if-exists=*) RECREATE_IF_EXISTS="${arg#*=}" ;;
     *) echo "Unknown argument: $arg" && usage ;;
   esac
 done
+
+RECREATE_IF_EXISTS="${RECREATE_IF_EXISTS:-false}"
 
 # Validate required args
 [ -z "$JENKINS_USER" ] && echo "Missing --user" && usage
@@ -105,26 +114,39 @@ TOKEN_FILE="secrets/${JENKINS_USER}_api_token.txt"
 JENKINS_USER_API_TOKEN="$(cat "$TOKEN_FILE")"
 
 # --- Check if credential already exists ---
-if curl -s -f -u "$JENKINS_USER:$JENKINS_USER_API_TOKEN" \
-  "$JENKINS_URL/credentials/store/system/domain/_/credential/$CREDENTIALS_ID/api/json" > /dev/null 2>&1; then
-  echo "✅ Credential '$CREDENTIALS_ID' already exists. Skipping creation."
-  rm -f "$TMP_XML"
-  exit 0
+CRED_URL="$JENKINS_URL/credentials/store/system/domain/_/credential/$CREDENTIALS_ID/api/json"
+if curl -s -f -u "$JENKINS_USER:$JENKINS_USER_API_TOKEN" "$CRED_URL" > /dev/null 2>&1; then
+  if [ "$RECREATE_IF_EXISTS" = "true" ]; then
+    echo "🔁 Credential '$CREDENTIALS_ID' exists. Deleting before re-creating..."
+    DELETE_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$JENKINS_URL/credentials/store/system/domain/_/credential/$CREDENTIALS_ID/doDelete" \
+      -u "$JENKINS_USER:$JENKINS_USER_API_TOKEN")
+    if [ "$DELETE_RESPONSE" != "200" ] && [ "$DELETE_RESPONSE" != "302" ]; then
+      echo "❌ Failed to delete existing credential (HTTP $DELETE_RESPONSE)"
+      exit 1
+    fi
+  else
+    echo "✅ Credential '$CREDENTIALS_ID' already exists. Skipping creation."
+    rm -f "$TMP_XML"
+    exit 0
+  fi
 fi
+
+TMP_XML=$(mktemp)
+trap 'rm -f "$TMP_XML"' EXIT
 
 # Generate XML
 case "$CREDENTIALS_TYPE" in
   UsernamePassword)
     [ -z "$CREDENTIALS_USERNAME" ] || [ -z "$CREDENTIALS_PASSWORD" ] && echo "Missing --username or --password" && usage
-    generate_username_password_xml > credential.xml
+    generate_username_password_xml > "$TMP_XML"
     ;;
   SecretText)
     [ -z "$CREDENTIALS_SECRET" ] && echo "Missing --secret" && usage
-    generate_secret_text_xml > credential.xml
+    generate_secret_text_xml > "$TMP_XML"
     ;;
   SSHPrivateKey)
     [ -z "$CREDENTIALS_USERNAME" ] || [ -z "$CREDENTIALS_PRIVATE_KEY" ] && echo "Missing --username or --private-key" && usage
-    generate_ssh_private_key_xml > credential.xml
+    generate_ssh_private_key_xml > "$TMP_XML"
     ;;
   *)
     echo "Unsupported credential type: $CREDENTIALS_TYPE" && usage
@@ -135,7 +157,7 @@ esac
 RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$JENKINS_URL/credentials/store/system/domain/_/createCredentials" \
   -u "$JENKINS_USER:$JENKINS_USER_API_TOKEN" \
   -H "Content-Type: application/xml" \
-  --data @credential.xml)
+  --data @"$TMP_XML")
 
 if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "204" ]; then
   echo "✅ Jenkins credential '$CREDENTIALS_ID' created successfully!"
@@ -154,7 +176,8 @@ fi
 #  --type=UsernamePassword \
 #  --username=gituser \
 #  --password=secr3t \
-#  --description="GitHub deploy credential"
+#  --description="GitHub deploy credential" \
+#  --recreate-if-exists=true
 #
 ## SecretText
 #./scripts/create_jenkins_credential.sh \
@@ -163,7 +186,8 @@ fi
 #  --id=webhook-token \
 #  --type=SecretText \
 #  --secret=abc123xyz \
-#  --description="Webhook token for app A"
+#  --description="Webhook token for app A" \
+#  --recreate-if-exists=true
 #
 ## SSHPrivateKey
 #./scripts/create_jenkins_credential.sh \
@@ -173,4 +197,5 @@ fi
 #  --type=SSHPrivateKey \
 #  --username=ubuntu \
 #  --private-key="$(cat ~/.ssh/id_rsa)" \
-#  --description="SSH key to EC2 instance"
+#  --description="SSH key to EC2 instance" \
+#  --recreate-if-exists=true
