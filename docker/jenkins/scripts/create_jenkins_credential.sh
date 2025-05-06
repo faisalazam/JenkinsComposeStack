@@ -46,6 +46,15 @@ usage() {
   exit 1
 }
 
+xml_escape() {
+  echo "$1" | sed \
+    -e 's/&/\&amp;/g' \
+    -e 's/</\&lt;/g' \
+    -e 's/>/\&gt;/g' \
+    -e 's/\"/\&quot;/g' \
+    -e "s/'/\&apos;/g"
+}
+
 # XML generators
 generate_username_password_xml() {
 cat <<EOF
@@ -61,24 +70,26 @@ EOF
 
 generate_secret_text_xml() {
 cat <<EOF
-<com.cloudbees.plugins.credentials.impl.StringCredentialsImpl>
+<org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl>
   <scope>GLOBAL</scope>
-  <id>$CREDENTIALS_ID</id>
-  <secret>$CREDENTIALS_SECRET</secret>
-  <description>$CREDENTIALS_DESCRIPTION</description>
-</com.cloudbees.plugins.credentials.impl.StringCredentialsImpl>
+  <id>$(xml_escape "$CREDENTIALS_ID")</id>
+  <secret>$(xml_escape "$CREDENTIALS_SECRET")</secret>
+  <description>$(xml_escape "$CREDENTIALS_DESCRIPTION")</description>
+</org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl>
 EOF
 }
 
 generate_ssh_private_key_xml() {
 cat <<EOF
-<com.cloudbees.plugins.credentials.impl.SSHUserPrivateKeyCredentialsImpl>
-  <scope>GLOBAL</scope>
-  <id>$CREDENTIALS_ID</id>
-  <username>$CREDENTIALS_USERNAME</username>
-  <privateKey>$CREDENTIALS_PRIVATE_KEY</privateKey>
-  <description>$CREDENTIALS_DESCRIPTION</description>
-</com.cloudbees.plugins.credentials.impl.SSHUserPrivateKeyCredentialsImpl>
+<com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey>
+    <scope>GLOBAL</scope>
+    <id>$CREDENTIALS_ID</id>
+    <username>$CREDENTIALS_USERNAME</username>
+    <description>$CREDENTIALS_DESCRIPTION</description>
+    <privateKeySource class="com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey\$DirectEntryPrivateKeySource">
+        <privateKey>$CREDENTIALS_PRIVATE_KEY</privateKey>
+    </privateKeySource>
+</com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey>
 EOF
 }
 
