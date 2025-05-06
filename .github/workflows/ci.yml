@@ -42,7 +42,8 @@ jobs:
 
       - name: Start and setup the container
         id: docker_start
-        run: docker compose up -d
+        run: |
+          JENKINS_CI_USER_PASSWORD=${{ env.CI_USER_PASSWORD }} docker compose up -d
         working-directory: ${{ env.JENKINS_WORKDIR }}
 
       - name: Test Jenkins server is up and running
