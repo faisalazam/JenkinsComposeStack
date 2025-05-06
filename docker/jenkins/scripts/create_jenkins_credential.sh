@@ -46,51 +46,56 @@ usage() {
   exit 1
 }
 
-xml_escape() {
-  echo "$1" | sed \
-    -e 's/&/\&amp;/g' \
-    -e 's/</\&lt;/g' \
-    -e 's/>/\&gt;/g' \
-    -e 's/\"/\&quot;/g' \
-    -e "s/'/\&apos;/g"
+generate_username_password_json() {
+  echo "{
+  \"\": \"0\",
+  \"credentials\": {
+    \"scope\": \"GLOBAL\",
+    \"id\": \"$CREDENTIALS_ID\",
+    \"username\": \"$CREDENTIALS_USERNAME\",
+    \"password\": \"$CREDENTIALS_PASSWORD\",
+    \"description\": \"$CREDENTIALS_DESCRIPTION\",
+    \"stapler-class\": \"com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl\"
+    }
+  }"
 }
 
-# XML generators
-generate_username_password_xml() {
-cat <<EOF
-<com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
-  <scope>GLOBAL</scope>
-  <id>$CREDENTIALS_ID</id>
-  <username>$CREDENTIALS_USERNAME</username>
-  <password>$CREDENTIALS_PASSWORD</password>
-  <description>$CREDENTIALS_DESCRIPTION</description>
-</com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
-EOF
+generate_secret_text_json() {
+  echo "{
+  \"\": \"0\",
+  \"credentials\": {
+    \"scope\": \"GLOBAL\",
+    \"id\": \"$CREDENTIALS_ID\",
+    \"secret\": \"$CREDENTIALS_SECRET\",
+    \"description\": \"$CREDENTIALS_DESCRIPTION\",
+    \"stapler-class\": \"org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl\"
+    }
+  }"
 }
 
-generate_secret_text_xml() {
-cat <<EOF
-<org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl>
-  <scope>GLOBAL</scope>
-  <id>$(xml_escape "$CREDENTIALS_ID")</id>
-  <secret>$(xml_escape "$CREDENTIALS_SECRET")</secret>
-  <description>$(xml_escape "$CREDENTIALS_DESCRIPTION")</description>
-</org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl>
-EOF
-}
+generate_ssh_private_key_json() {
+  # Normalize the private key:
+  # - Remove Windows-style carriage returns (\r)
+  # - Replace actual newlines with literal \n for JSON string compatibility
+  NORMALIZED_PRIVATE_KEY=$(printf '%s' "$CREDENTIALS_PRIVATE_KEY" | sed ':a;N;$!ba;s/\r//g;s/\n/\\n/g')
 
-generate_ssh_private_key_xml() {
-cat <<EOF
-<com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey>
-    <scope>GLOBAL</scope>
-    <id>$CREDENTIALS_ID</id>
-    <username>$CREDENTIALS_USERNAME</username>
-    <description>$CREDENTIALS_DESCRIPTION</description>
-    <privateKeySource class="com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey\$DirectEntryPrivateKeySource">
-        <privateKey>$CREDENTIALS_PRIVATE_KEY</privateKey>
-    </privateKeySource>
-</com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey>
-EOF
+  # Alternative: Read from file directly (if not already read into a variable)
+  # NORMALIZED_PRIVATE_KEY=$(sed ':a;N;$!ba;s/\r//g;s/\n/\\n/g' ./secrets/gitlab_id_rsa)
+
+  echo "{
+  \"\": \"0\",
+  \"credentials\": {
+    \"scope\": \"GLOBAL\",
+    \"id\": \"$CREDENTIALS_ID\",
+    \"username\": \"$CREDENTIALS_USERNAME\",
+    \"description\": \"$CREDENTIALS_DESCRIPTION\",
+    \"privateKeySource\": {
+      \"stapler-class\": \"com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey\$DirectEntryPrivateKeySource\",
+      \"privateKey\": \"$NORMALIZED_PRIVATE_KEY\"
+    },
+    \"stapler-class\": \"com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey\"
+    }
+  }"
 }
 
 # Parse named args
@@ -124,6 +129,16 @@ TOKEN_FILE="secrets/${JENKINS_USER}_api_token.txt"
 [ ! -f "$TOKEN_FILE" ] && echo "Missing token file: $TOKEN_FILE" && exit 1
 JENKINS_USER_API_TOKEN="$(cat "$TOKEN_FILE")"
 
+CRUMB_JSON=$(curl -s -u "$JENKINS_USER:$JENKINS_USER_API_TOKEN" "$JENKINS_URL/crumbIssuer/api/json")
+CRUMB=$(echo "$CRUMB_JSON" | sed -n 's/.*"crumb":"\([^"]*\)".*/\1/p')
+CRUMB_FIELD=$(echo "$CRUMB_JSON" | sed -n 's/.*"crumbRequestField":"\([^"]*\)".*/\1/p')
+
+# Check if CRUMB was retrieved successfully
+if [ -z "$CRUMB" ] || [ -z "$CRUMB_FIELD" ]; then
+  echo "❌ Failed to fetch CSRF token! Check Jenkins credentials."
+  exit 1
+fi
+
 # --- Check if credential already exists ---
 CRED_URL="$JENKINS_URL/credentials/store/system/domain/_/credential/$CREDENTIALS_ID/api/json"
 if curl -s -f -u "$JENKINS_USER:$JENKINS_USER_API_TOKEN" "$CRED_URL" > /dev/null 2>&1; then
@@ -137,38 +152,39 @@ if curl -s -f -u "$JENKINS_USER:$JENKINS_USER_API_TOKEN" "$CRED_URL" > /dev/null
     fi
   else
     echo "✅ Credential '$CREDENTIALS_ID' already exists. Skipping creation."
-    rm -f "$TMP_XML"
     exit 0
   fi
 fi
 
-TMP_XML=$(mktemp)
-trap 'rm -f "$TMP_XML"' EXIT
-
-# Generate XML
+# Generate JSON and store in a variable
 case "$CREDENTIALS_TYPE" in
   UsernamePassword)
     [ -z "$CREDENTIALS_USERNAME" ] || [ -z "$CREDENTIALS_PASSWORD" ] && echo "Missing --username or --password" && usage
-    generate_username_password_xml > "$TMP_XML"
+    CREDENTIALS_JSON=$(generate_username_password_json)
     ;;
+
   SecretText)
     [ -z "$CREDENTIALS_SECRET" ] && echo "Missing --secret" && usage
-    generate_secret_text_xml > "$TMP_XML"
+    CREDENTIALS_JSON=$(generate_secret_text_json)
     ;;
+
   SSHPrivateKey)
     [ -z "$CREDENTIALS_USERNAME" ] || [ -z "$CREDENTIALS_PRIVATE_KEY" ] && echo "Missing --username or --private-key" && usage
-    generate_ssh_private_key_xml > "$TMP_XML"
+    CREDENTIALS_JSON=$(generate_ssh_private_key_json)
     ;;
+
   *)
     echo "Unsupported credential type: $CREDENTIALS_TYPE" && usage
     ;;
 esac
 
-# POST to Jenkins
-RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$JENKINS_URL/credentials/store/system/domain/_/createCredentials" \
+# POST to Jenkins with the JSON
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -L \
+  -X POST "$JENKINS_URL/credentials/store/system/domain/_/createCredentials" \
   -u "$JENKINS_USER:$JENKINS_USER_API_TOKEN" \
-  -H "Content-Type: application/xml" \
-  --data @"$TMP_XML")
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "$CRUMB_FIELD: $CRUMB" \
+  --data-urlencode "json=$CREDENTIALS_JSON")
 
 if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "204" ]; then
   echo "✅ Jenkins credential '$CREDENTIALS_ID' created successfully!"
@@ -181,32 +197,32 @@ fi
 ################################ Usage Examples #########################
 ## UsernamePassword
 #./scripts/create_jenkins_credential.sh \
-#  --user=ci_user \
+#  --user="ci_user" \
 #  --url=http://localhost:8080 \
-#  --id=github-deploy \
+#  --id="github-deploy" \
 #  --type=UsernamePassword \
-#  --username=gituser \
-#  --password=secr3t \
+#  --username="gituser" \
+#  --password="secr3t" \
 #  --description="GitHub deploy credential" \
 #  --recreate-if-exists=true
 #
 ## SecretText
 #./scripts/create_jenkins_credential.sh \
-#  --user=ci_user \
+#  --user="ci_user" \
 #  --url=http://localhost:8080 \
-#  --id=webhook-token \
+#  --id="webhook-token" \
 #  --type=SecretText \
-#  --secret=abc123xyz \
+#  --secret="abc1&?#@$23xyz" \
 #  --description="Webhook token for app A" \
 #  --recreate-if-exists=true
 #
 ## SSHPrivateKey
 #./scripts/create_jenkins_credential.sh \
-#  --user=ci_user \
+#  --user="ci_user" \
 #  --url=http://localhost:8080 \
-#  --id=ssh-access \
+#  --id="ssh-access" \
 #  --type=SSHPrivateKey \
-#  --username=ubuntu \
-#  --private-key="$(cat ~/.ssh/id_rsa)" \
+#  --username="ubuntu" \
+#  --private-key="$(cat ./secrets/gitlab_id_rsa)" \
 #  --description="SSH key to EC2 instance" \
 #  --recreate-if-exists=true
