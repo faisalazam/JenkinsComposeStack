@@ -3,7 +3,7 @@ blueocean:1.27.19
 
 # Core functionality
 workflow-aggregator:608.v67378e9d3db_1          # Full Pipeline (Jenkinsfile) support
-configuration-as-code:1963.v24e046127a_3f       # Jenkins as Code (JCasC)
+configuration-as-code:1967.va_968e15fd05b_      # Jenkins as Code (JCasC)
 
 # UI & Parameterized Jobs (Dropdowns)
 job-dsl:1.92                                    # Programmatically create jobs
