@@ -27,3 +27,4 @@ envinject:2.926.v69c9b_3896a_96                 # This plugin makes it possible 
 throttle-concurrents:2.16                       # This plugin allows for throttling the number of concurrent builds of a project running per node or globally.
 
 role-strategy:756.v978cb_392eb_d3               # This plugin allows to add a new role-based mechanism to manage users' permissions.
+matrix-auth:3.2.6                               # This plugin allows fine-grained access control such as starting new builds, configuring items, or deleting them, individually.
