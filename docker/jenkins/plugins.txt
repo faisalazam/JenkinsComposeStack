@@ -25,3 +25,5 @@ docker-plugin:1274.vc0203fdf2e74                # Allows containers to be dynami
 envinject:2.926.v69c9b_3896a_96                 # This plugin makes it possible to setup a custom environment for your jobs.
 
 throttle-concurrents:2.16                       # This plugin allows for throttling the number of concurrent builds of a project running per node or globally.
+
+role-strategy:756.v978cb_392eb_d3               # This plugin allows to add a new role-based mechanism to manage users' permissions.
