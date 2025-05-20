@@ -18,7 +18,7 @@ ssh-slaves:3.1031.v72c6b_883b_869               # SSH connectivity (if needed fo
 credentials-binding:687.v619cb_15e923f          # Store and use secrets safely
 
 # Logging & Timestamps
-timestamper:1.28                                # Adds timestamps to job logs
+timestamper:1.29                                # Adds timestamps to job logs
 
 docker-plugin:1274.vc0203fdf2e74                # Allows containers to be dynamically provisioned as Jenkins agents using Docker
 
@@ -26,5 +26,5 @@ envinject:2.926.v69c9b_3896a_96                 # This plugin makes it possible 
 
 throttle-concurrents:2.16                       # This plugin allows for throttling the number of concurrent builds of a project running per node or globally.
 
-role-strategy:756.v978cb_392eb_d3               # This plugin allows to add a new role-based mechanism to manage users' permissions.
+role-strategy:764.v3c95b_fcb_32ee               # This plugin allows to add a new role-based mechanism to manage users' permissions.
 matrix-auth:3.2.6                               # This plugin allows fine-grained access control such as starting new builds, configuring items, or deleting them, individually.
