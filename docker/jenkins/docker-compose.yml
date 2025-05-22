@@ -33,9 +33,12 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
       - jenkins_docker_certs:${DOCKER_CLIENT_TLS_CERTDIR}:ro # This shared volume will be mounted in all the clients accessing dind or docker
-      - ./casc_configs:/var/jenkins_home/casc_configs
+      - ./casc_configs:${JENKINS_CASC_CONFIG}
       - ./plugins.txt:/usr/share/jenkins/ref/plugins.txt
       - jenkins_agent_dind_metadata_shared:${JENKINS_AGENT_SHARED_METADATA_DIR}:ro
+    entrypoint: [ "/usr/bin/tini", "--" ]
+    command: >
+      sh -c "chown -R jenkins:jenkins ${JENKINS_CASC_CONFIG} && '/usr/local/bin/jenkins.sh'"
     networks:
       - jenkins_network
     depends_on:
