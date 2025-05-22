@@ -51,11 +51,10 @@ jobs:
         run: sh tests/test_jenkins.sh
         working-directory: ${{ env.JENKINS_WORKDIR }}
       
-# TODO: FIXME and uncomment
-#      - name: Test the ownership of dirs
-#        if: steps.docker_start.outcome == 'success'
-#        run: sh tests/test_ownership.sh
-#        working-directory: ${{ env.JENKINS_WORKDIR }}
+      - name: Test the ownership of dirs
+        if: steps.docker_start.outcome == 'success'
+        run: sh tests/test_ownership.sh
+        working-directory: ${{ env.JENKINS_WORKDIR }}
 
       - name: Create secrets file
         if: steps.test_jenkins.outcome == 'success'
