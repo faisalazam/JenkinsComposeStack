@@ -13,6 +13,7 @@ services:
     ports:
       - "${JENKINS_PORT}:8080"
     environment:
+      - JENKINS_HOME_DIR=${JENKINS_HOME_DIR}
       - DOCKER_DAEMON_URL=${DOCKER_DAEMON_URL}
       - ADMIN_PASSWORD=${JENKINS_ADMIN_PASSWORD}
       - CASC_JENKINS_CONFIG=${JENKINS_CASC_CONFIG}
@@ -27,11 +28,12 @@ services:
       - SEED_GENERATOR_JOB_DESCRIPTION=${SEED_GENERATOR_JOB_DESCRIPTION}
       - JENKINS_AGENT_REMOTEFS=${JENKINS_AGENT_REMOTEFS}
       - JENKINS_SLAVE_AGENT_PORT=${JENKINS_SLAVE_AGENT_PORT}
+      - JENKINS_JCASC_SECRETS_DIR=${JENKINS_JCASC_SECRETS_DIR}
       - JENKINS_AGENT_WORKSPACE_DIR=${JENKINS_AGENT_WORKSPACE_DIR}
       - JENKINS_DOCKER_AGENT_IMAGE_PATH=${JENKINS_DOCKER_AGENT_IMAGE_PATH}
       - JENKINS_AGENT_SHARED_METADATA_DIR=${JENKINS_AGENT_SHARED_METADATA_DIR}
     volumes:
-      - jenkins_home:/var/jenkins_home
+      - jenkins_home:${JENKINS_HOME_DIR}
       - jenkins_docker_certs:${DOCKER_CLIENT_TLS_CERTDIR}:ro # This shared volume will be mounted in all the clients accessing dind or docker
       - ./casc_configs:${JENKINS_CASC_CONFIG}
       - ./plugins.txt:/usr/share/jenkins/ref/plugins.txt
@@ -40,7 +42,7 @@ services:
     entrypoint: [ "/usr/bin/tini", "--" ]
     command: [ "sh", "/usr/local/bin/jenkins_entrypoint.sh" ]
     post_start:
-      - command: "chown -R jenkins:jenkins /var/jenkins_home"
+      - command: "chown -R jenkins:jenkins ${JENKINS_HOME_DIR}"
         user: root
     networks:
       - jenkins_network

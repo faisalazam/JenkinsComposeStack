@@ -4,7 +4,7 @@ CONTAINER_NAME="jenkins"
 
 docker exec "$CONTAINER_NAME" sh -c '
   # Directories to check
-  DIRS="/var/jenkins_home /usr/share/jenkins/ref"
+  DIRS="${JENKINS_HOME_DIR} /usr/share/jenkins/ref"
   for TARGET_DIR in $DIRS; do
       if [ -d "$TARGET_DIR" ]; then
           # Check if any file is not owned by jenkins

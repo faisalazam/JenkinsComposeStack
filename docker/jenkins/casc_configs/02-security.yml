@@ -6,10 +6,10 @@ jenkins:
       users:
         - id: "admin"
           name: "Administrator"
-          password: "${decodeBase64:${readFile:/var/jenkins_home/jcasc_secrets/admin_password}}"
+          password: "${decodeBase64:${readFile:${JENKINS_JCASC_SECRETS_DIR}/admin_password}}"
         - id: "ci_user"
           name: "CI_User"
-          password: "${decodeBase64:${readFile:/var/jenkins_home/jcasc_secrets/ci_user_password}}"
+          password: "${decodeBase64:${readFile:${JENKINS_JCASC_SECRETS_DIR}/ci_user_password}}"
 
   authorizationStrategy:
     loggedInUsersCanDoAnything:
