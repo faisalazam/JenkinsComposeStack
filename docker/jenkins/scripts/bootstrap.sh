@@ -13,7 +13,7 @@ set -e
 
 # Capture env vars immediately and unset right away — upfront and first thing,
 # so even if the below script fails for whatever reason, the sensitive vars are always unset.
-JENKINS_ADMIN_PASSWORD_VALUE="$JENKINS_ADMIN_PASSWORD"
+JENKINS_ADMIN_PASSWORD_VALUE="$JENKINS_ADMIN_PASSWORD12"
 unset JENKINS_ADMIN_PASSWORD
 
 JENKINS_CI_USER_PASSWORD_VALUE="$JENKINS_CI_USER_PASSWORD"
@@ -21,6 +21,7 @@ unset JENKINS_CI_USER_PASSWORD
 
 SECRET_DIR="./secrets/jcasc_secrets"
 
+rm -rf "$SECRET_DIR"
 mkdir -p "$SECRET_DIR"
 chmod 0700 "$SECRET_DIR"
 
@@ -30,11 +31,12 @@ write_secret() {
 
   if [ -n "$USER_PASSWORD" ]; then
     printf %s "$USER_PASSWORD" | base64 | tr -d '\n' > "$FILE_PATH"
-    chmod 0600 "$FILE_PATH"
     echo "[INFO] Secret has been written to $FILE_PATH"
   else
-    echo "[WARN] Password is empty. $FILE_PATH not created." >&2
+    touch "$FILE_PATH"
+    echo "[ERROR] Password is empty. An empty $FILE_PATH file created." >&2
   fi
+  chmod 0600 "$FILE_PATH"
 }
 
 write_secret "$JENKINS_ADMIN_PASSWORD_VALUE" "admin_password"
