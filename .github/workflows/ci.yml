@@ -44,6 +44,13 @@ jobs:
         run: |
           export JENKINS_CI_USER_PASSWORD=${{ env.CI_USER_PASSWORD }}
           sh ./scripts/bootstrap.sh
+          ls -larh secrets/jcasc_secrets/
+        working-directory: ${{ env.JENKINS_WORKDIR }}
+
+      - name: Check ls after bootstrap
+        run: |
+          whoami
+          ls -larh secrets/jcasc_secrets/
         working-directory: ${{ env.JENKINS_WORKDIR }}
 
       - name: Start and setup the container
@@ -60,6 +67,12 @@ jobs:
       - name: Test the ownership of dirs
         if: steps.docker_start.outcome == 'success'
         run: sh tests/test_ownership.sh
+        working-directory: ${{ env.JENKINS_WORKDIR }}
+
+      - name: Check ls before generate_token
+        run: |
+          whoami
+          ls -larh secrets/jcasc_secrets/
         working-directory: ${{ env.JENKINS_WORKDIR }}
 
       - name: Generate the API token for the CI_User needed to be used with test scripts
