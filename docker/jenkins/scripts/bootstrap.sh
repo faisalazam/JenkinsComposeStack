@@ -13,7 +13,7 @@ set -e
 
 # Capture env vars immediately and unset right away — upfront and first thing,
 # so even if the below script fails for whatever reason, the sensitive vars are always unset.
-JENKINS_ADMIN_PASSWORD_VALUE="$JENKINS_ADMIN_PASSWORD12"
+JENKINS_ADMIN_PASSWORD_VALUE="$JENKINS_ADMIN_PASSWORD"
 unset JENKINS_ADMIN_PASSWORD
 
 JENKINS_CI_USER_PASSWORD_VALUE="$JENKINS_CI_USER_PASSWORD"

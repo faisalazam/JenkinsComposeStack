@@ -5,8 +5,8 @@ TOKEN_NAME="ci_user_api_token"
 COOKIE_JAR="secrets/cookies.txt"
 JENKINS_URL="http://localhost:8080"
 CI_USER_API_TOKEN_FILE="secrets/ci_user_api_token.txt"
-CI_USER_PASSWORD_FILE="secrets/ci_user_password.txt"
-CI_USER_PASSWORD="$(cat $CI_USER_PASSWORD_FILE)"
+CI_USER_PASSWORD_FILE="secrets/jcasc_secrets/ci_user_password"
+CI_USER_PASSWORD="$(base64 -d "$CI_USER_PASSWORD_FILE")"
 
 # Fetch CSRF token
 CRUMB_JSON=$(curl -c "$COOKIE_JAR" -s -u "$CI_USER:$CI_USER_PASSWORD" "$JENKINS_URL/crumbIssuer/api/json")

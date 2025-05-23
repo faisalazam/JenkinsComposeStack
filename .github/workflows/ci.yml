@@ -13,7 +13,6 @@ env:
   REGISTRY_CONTAINER_NAME: registry
   DOCKER_COMPOSE_FILE: docker-compose.yml
   DOCKER_VERSION: 5:28.0.1-1~ubuntu.24.04~noble
-  CI_USER_PASSWORD_FILE: secrets/ci_user_password.txt
 
 jobs:
   build:
@@ -40,10 +39,17 @@ jobs:
             -addext "subjectAltName=DNS:${{ env.REGISTRY_CONTAINER_NAME }}"
         working-directory: ${{ env.JENKINS_WORKDIR }}
 
+      - name: Create secrets files
+        id: create_secrets
+        run: |
+          export JENKINS_CI_USER_PASSWORD=${{ env.CI_USER_PASSWORD }}
+          sh ./scripts/bootstrap.sh
+        working-directory: ${{ env.JENKINS_WORKDIR }}
+
       - name: Start and setup the container
         id: docker_start
         run: |
-          JENKINS_CI_USER_PASSWORD=${{ env.CI_USER_PASSWORD }} docker compose up -d
+          docker compose up -d
         working-directory: ${{ env.JENKINS_WORKDIR }}
 
       - name: Test Jenkins server is up and running
@@ -54,13 +60,6 @@ jobs:
       - name: Test the ownership of dirs
         if: steps.docker_start.outcome == 'success'
         run: sh tests/test_ownership.sh
-        working-directory: ${{ env.JENKINS_WORKDIR }}
-
-      - name: Create secrets file
-        if: steps.test_jenkins.outcome == 'success'
-        run: |
-          mkdir -p secrets
-          echo "${{ env.CI_USER_PASSWORD }}" > ${{ env.CI_USER_PASSWORD_FILE }}
         working-directory: ${{ env.JENKINS_WORKDIR }}
 
       - name: Generate the API token for the CI_User needed to be used with test scripts
