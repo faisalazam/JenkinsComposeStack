@@ -40,7 +40,7 @@ services:
     entrypoint: [ "/usr/bin/tini", "--" ]
     command: [ "sh", "/usr/local/bin/jenkins_entrypoint.sh" ]
     post_start:
-      - command: "chown -R jenkins:jenkins ${JENKINS_CASC_CONFIG}"
+      - command: "chown -R jenkins:jenkins /var/jenkins_home"
         user: root
     networks:
       - jenkins_network

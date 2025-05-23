@@ -8,7 +8,7 @@ unset ADMIN_PASSWORD
 CI_USER_PASSWORD_VALUE="$CI_USER_PASSWORD"
 unset CI_USER_PASSWORD
 
-SECRET_DIR="/var/jenkins_home/secrets"
+SECRET_DIR="/var/jenkins_home/jcasc_secrets"
 
 mkdir -p "$SECRET_DIR"
 chmod 0700 "$SECRET_DIR"
