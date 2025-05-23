@@ -6,10 +6,10 @@ jenkins:
       users:
         - id: "admin"
           name: "Administrator"
-          password: "${ADMIN_PASSWORD}"
+          password: "${readFile:/var/jenkins_home/secrets/admin_password}"
         - id: "ci_user"
           name: "CI_User"
-          password: "${CI_USER_PASSWORD}"
+          password: "${readFile:/var/jenkins_home/secrets/ci_user_password}"
 
   authorizationStrategy:
     loggedInUsersCanDoAnything:
