@@ -11,7 +11,7 @@ write_secret() {
   USER_PASSWORD=$(eval "echo \$$VAR_NAME")
 
   if [ -n "$USER_PASSWORD" ]; then
-    printf %s "$USER_PASSWORD" > "$SECRET_DIR/$FILE_NAME"
+    printf %s "$USER_PASSWORD" | base64 | tr -d '\n' > "$SECRET_DIR/$FILE_NAME"
     chmod 0600 "$SECRET_DIR/$FILE_NAME"
     echo "[INFO] Secret has been written to $SECRET_DIR/$FILE_NAME"
   else
