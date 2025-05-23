@@ -3,6 +3,8 @@ services:
   # the dind container and handle all Docker-related tasks.
   # Diagnostics (or running the docker commands) can be performed directly inside dind, keeping the Jenkins container
   # lightweight and following best practices.
+  #
+  # See ./scripts/bootstrap.sh as that should be run manually once before executing `docker compose up`.
   jenkins:
     build:
       context: .
@@ -15,9 +17,7 @@ services:
     environment:
       - JENKINS_HOME_DIR=${JENKINS_HOME_DIR}
       - DOCKER_DAEMON_URL=${DOCKER_DAEMON_URL}
-      - ADMIN_PASSWORD=${JENKINS_ADMIN_PASSWORD}
       - CASC_JENKINS_CONFIG=${JENKINS_CASC_CONFIG}
-      - CI_USER_PASSWORD=${JENKINS_CI_USER_PASSWORD}
       - DOCKER_CERT_PATH=${DOCKER_CLIENT_TLS_CERTDIR}
       - ENABLE_SEED_JOB=${ENABLE_SEED_JOB}
       - SEED_JOB_REPO_URL=${SEED_JOB_REPO_URL}
@@ -37,10 +37,8 @@ services:
       - jenkins_docker_certs:${DOCKER_CLIENT_TLS_CERTDIR}:ro # This shared volume will be mounted in all the clients accessing dind or docker
       - ./casc_configs:${JENKINS_CASC_CONFIG}
       - ./plugins.txt:/usr/share/jenkins/ref/plugins.txt
-      - ./scripts/jenkins_entrypoint.sh:/usr/local/bin/jenkins_entrypoint.sh
+      - ./secrets/jcasc_secrets:${JENKINS_JCASC_SECRETS_DIR}
       - jenkins_agent_dind_metadata_shared:${JENKINS_AGENT_SHARED_METADATA_DIR}:ro
-    entrypoint: [ "/usr/bin/tini", "--" ]
-    command: [ "sh", "/usr/local/bin/jenkins_entrypoint.sh" ]
     post_start:
       - command: "chown -R jenkins:jenkins ${JENKINS_HOME_DIR}"
         user: root
