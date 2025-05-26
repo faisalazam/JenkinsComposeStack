@@ -85,7 +85,7 @@ jobs:
                               .split("\\r?\\n")
                               .collect { it.split("#")[0].trim() } // Remove comments
                               .findAll { it } // Remove empty lines
-                  
+
                           // Parse required plugins and their versions
                           def pluginVersionMap = [:]
                           requiredPlugins.each { plugin ->
@@ -94,22 +94,22 @@ jobs:
                             def pluginVersion = parts.size() == 2 ? parts[1].trim() : null
                             pluginVersionMap[pluginName] = pluginVersion
                           }
-                  
+
                           // Fetch installed plugins from Jenkins API
                           def pluginList = sh(
+                            // TODO: CI_USER_PASSWORD doesn't exist anymore, read from file...
                             script: '''
-                              // TODO: CI_USER_PASSWORD doesn't exist anymore, read from file...
                               curl -s -u "ci_user:cI_User@123" "http://jenkins:8080/pluginManager/api/json?depth=1"
                             ''',
                             returnStdout: true
                           ).trim()
-                  
+
                           // Parse JSON response
                           def json = new groovy.json.JsonSlurper().parseText(pluginList)
-                  
+
                           // Convert plugin list into a map of shortName -> version
                           def installedPlugins = json.plugins.collectEntries { [(it.shortName): it.version] }
-                  
+
                           // Check for missing or outdated plugins
                           def missingPlugins = []
                           def outdatedPlugins = []
@@ -123,7 +123,7 @@ jobs:
                               }
                             }
                           }
-                  
+
                           if (missingPlugins.isEmpty() && outdatedPlugins.isEmpty()) {
                             echo "✅ All required plugins are installed with the correct versions."
                           } else {
