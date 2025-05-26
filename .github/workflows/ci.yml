@@ -65,7 +65,7 @@ jobs:
       - name: Generate the API token for the CI_User needed to be used with test scripts
         if: steps.test_jenkins.outcome == 'success'
         id: generate_token
-        run: sh scripts/generate_token.sh
+        run: docker exec jenkins sh /usr/local/bin/scripts/generate_token.sh
         working-directory: ${{ env.JENKINS_WORKDIR }}
 
       - name: Test Jenkins agents are online and connected
