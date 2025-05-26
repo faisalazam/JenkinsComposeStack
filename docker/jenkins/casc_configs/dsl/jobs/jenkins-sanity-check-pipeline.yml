@@ -96,13 +96,19 @@ jobs:
                           }
 
                           // Fetch installed plugins from Jenkins API
-                          def pluginList = sh(
-                            // TODO: CI_USER_PASSWORD doesn't exist anymore, read from file...
-                            script: '''
-                              curl -s -u "ci_user:cI_User@123" "http://jenkins:8080/pluginManager/api/json?depth=1"
-                            ''',
-                            returnStdout: true
-                          ).trim()
+                          def pluginList = ''
+                          withCredentials([usernamePassword(
+                            credentialsId: 'ci_user_creds',
+                            usernameVariable: 'CI_USER',
+                            passwordVariable: 'CI_PASS'
+                          )]) {
+                            pluginList = sh(
+                              script: '''
+                                curl -s -u "\$CI_USER:\$CI_PASS" "http://jenkins:8080/pluginManager/api/json?depth=1"
+                              ''',
+                              returnStdout: true
+                            ).trim()
+                          }
 
                           // Parse JSON response
                           def json = new groovy.json.JsonSlurper().parseText(pluginList)
