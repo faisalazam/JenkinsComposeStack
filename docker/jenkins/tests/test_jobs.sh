@@ -1,11 +1,13 @@
 #!/bin/sh
 
+# MSYS_NO_PATHCONV=1 docker exec jenkins sh /usr/local/bin/tests/test_jobs.sh
+
 MAX_RETRIES=120
 RETRY_INTERVAL=2  # seconds
 CI_USER="ci_user"
 JENKINS_URL="http://localhost:8080"
 JOB_NAME="jenkins-sanity-check-pipeline"
-CI_USER_API_TOKEN_FILE="secrets/ci_user_api_token.txt"
+CI_USER_API_TOKEN_FILE="/var/jenkins_home/jcasc_secrets/generated/ci_user_api_token"
 CI_USER_API_TOKEN="$(cat $CI_USER_API_TOKEN_FILE)"
 
 # Fetch CSRF token

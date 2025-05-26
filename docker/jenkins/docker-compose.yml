@@ -38,7 +38,8 @@ services:
       - ./casc_configs:${JENKINS_CASC_CONFIG}
       - ./plugins.txt:/usr/share/jenkins/ref/plugins.txt
       - ./secrets/jcasc_secrets:${JENKINS_JCASC_SECRETS_DIR}
-      - ./scripts/generate_token.sh:/usr/local/bin/scripts/generate_token.sh
+      - ./tests:/usr/local/bin/tests:ro
+      - ./scripts/generate_token.sh:/usr/local/bin/scripts/generate_token.sh:ro
       - jenkins_agent_dind_metadata_shared:${JENKINS_AGENT_SHARED_METADATA_DIR}:ro
     post_start:
       - command: "chown -R jenkins:jenkins ${JENKINS_HOME_DIR}"

@@ -59,7 +59,7 @@ jobs:
       
       - name: Test the ownership of dirs
         if: steps.docker_start.outcome == 'success'
-        run: sh tests/test_ownership.sh
+        run: docker exec jenkins sh /usr/local/bin/tests/test_ownership.sh
         working-directory: ${{ env.JENKINS_WORKDIR }}
 
       - name: Generate the API token for the CI_User needed to be used with test scripts
@@ -70,12 +70,12 @@ jobs:
 
       - name: Test Jenkins agents are online and connected
         if: steps.generate_token.outcome == 'success'
-        run: sh tests/test_agents.sh
+        run: docker exec jenkins sh /usr/local/bin/tests/test_agents.sh
         working-directory: ${{ env.JENKINS_WORKDIR }}
 
       - name: Run the sanity check pipeline
         if: steps.generate_token.outcome == 'success'
-        run: sh tests/test_jobs.sh
+        run: docker exec jenkins sh /usr/local/bin/tests/test_jobs.sh
         working-directory: ${{ env.JENKINS_WORKDIR }}
 
       - name: Debug Running Containers

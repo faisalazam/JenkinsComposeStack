@@ -1,8 +1,10 @@
 #!/bin/sh
 
+# MSYS_NO_PATHCONV=1 docker exec jenkins sh /usr/local/bin/tests/test_agents.sh
+
 CI_USER="ci_user"
 JENKINS_URL="http://localhost:8080"
-CI_USER_API_TOKEN_FILE="secrets/ci_user_api_token.txt"
+CI_USER_API_TOKEN_FILE="/var/jenkins_home/jcasc_secrets/generated/ci_user_api_token"
 CI_USER_API_TOKEN="$(cat $CI_USER_API_TOKEN_FILE)"
 
 # Get agent status with error handling
