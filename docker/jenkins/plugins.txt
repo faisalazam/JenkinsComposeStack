@@ -1,24 +1,24 @@
 git:5.7.0
-blueocean:1.27.19
+blueocean:1.27.21
 
 # Core functionality
 workflow-aggregator:608.v67378e9d3db_1          # Full Pipeline (Jenkinsfile) support
-configuration-as-code:1967.va_968e15fd05b_      # Jenkins as Code (JCasC)
+configuration-as-code:1971.vf9280461ea_89       # Jenkins as Code (JCasC)
 
 # UI & Parameterized Jobs (Dropdowns)
-job-dsl:1.92                                    # Programmatically create jobs
+job-dsl:1.93                                    # Programmatically create jobs
 pipeline-utility-steps:2.19.0                   # Read/write files, manipulate parameters
 uno-choice:2.8.8                                # active-choices - Dynamic dropdowns (populate from files)
 
 # Docker & Infrastructure
-docker-workflow:611.v16e84da_6d3ff              # Run builds inside Docker containers
+docker-workflow:621.va_73f881d9232              # Run builds inside Docker containers
 ssh-slaves:3.1031.v72c6b_883b_869               # SSH connectivity (if needed for Ansible)
 
 # Secrets Management
-credentials-binding:687.v619cb_15e923f          # Store and use secrets safely
+credentials-binding:696.v256688029804           # Store and use secrets safely
 
 # Logging & Timestamps
-timestamper:1.29                                # Adds timestamps to job logs
+timestamper:1.30                                # Adds timestamps to job logs
 
 docker-plugin:1274.vc0203fdf2e74                # Allows containers to be dynamically provisioned as Jenkins agents using Docker
 
@@ -26,5 +26,5 @@ envinject:2.926.v69c9b_3896a_96                 # This plugin makes it possible 
 
 throttle-concurrents:2.16                       # This plugin allows for throttling the number of concurrent builds of a project running per node or globally.
 
-role-strategy:764.v3c95b_fcb_32ee               # This plugin allows to add a new role-based mechanism to manage users' permissions.
+role-strategy:785.v8d262df0f607                 # This plugin allows to add a new role-based mechanism to manage users' permissions.
 matrix-auth:3.2.6                               # This plugin allows fine-grained access control such as starting new builds, configuring items, or deleting them, individually.
