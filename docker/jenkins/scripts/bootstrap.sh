@@ -29,6 +29,11 @@ write_secret() {
   USER_PASSWORD="$1"
   FILE_PATH="$SECRET_DIR/$2"
 
+  if [ -s "$FILE_PATH" ]; then
+    echo "[INFO] Secret already exists at $FILE_PATH and is not empty. Skipping write."
+    return
+  fi
+
   if [ -n "$USER_PASSWORD" ]; then
     printf %s "$USER_PASSWORD" | base64 | tr -d '\n' > "$FILE_PATH"
     echo "[INFO] Secret has been written to $FILE_PATH"
