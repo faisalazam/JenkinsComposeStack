@@ -125,7 +125,7 @@ RECREATE_IF_EXISTS="${RECREATE_IF_EXISTS:-false}"
 [ -z "$CREDENTIALS_DESCRIPTION" ] && echo "Missing --description" && usage
 
 # Read token
-TOKEN_FILE="secrets/${JENKINS_USER}_api_token"
+TOKEN_FILE="secrets/jcasc_secrets/generated/${JENKINS_USER}_api_token"
 [ ! -f "$TOKEN_FILE" ] && echo "Missing token file: $TOKEN_FILE" && exit 1
 JENKINS_USER_API_TOKEN="$(cat "$TOKEN_FILE")"
 
