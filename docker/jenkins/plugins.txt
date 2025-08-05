@@ -12,10 +12,10 @@ uno-choice:2.8.8                                # active-choices - Dynamic dropd
 
 # Docker & Infrastructure
 docker-workflow:621.va_73f881d9232              # Run builds inside Docker containers
-ssh-slaves:3.1031.v72c6b_883b_869               # SSH connectivity (if needed for Ansible)
+ssh-slaves:3.1071.v0d059c7b_c555                # SSH connectivity (if needed for Ansible)
 
 # Secrets Management
-credentials-binding:696.v256688029804           # Store and use secrets safely
+credentials-binding:702.vfe613e537e88           # Store and use secrets safely
 
 # Logging & Timestamps
 timestamper:1.30                                # Adds timestamps to job logs
@@ -26,5 +26,5 @@ envinject:2.926.v69c9b_3896a_96                 # This plugin makes it possible 
 
 throttle-concurrents:2.16                       # This plugin allows for throttling the number of concurrent builds of a project running per node or globally.
 
-role-strategy:785.v8d262df0f607                 # This plugin allows to add a new role-based mechanism to manage users' permissions.
+role-strategy:799.v5b_e7b_ecc231e               # This plugin allows to add a new role-based mechanism to manage users' permissions.
 matrix-auth:3.2.6                               # This plugin allows fine-grained access control such as starting new builds, configuring items, or deleting them, individually.
