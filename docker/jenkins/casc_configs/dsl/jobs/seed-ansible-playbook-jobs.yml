@@ -27,6 +27,7 @@ jobs:
           }
 
           environmentVariables {
+            env('JENKINS_AGENT_DOWNLOADS_DIR', "${JENKINS_AGENT_DOWNLOADS_DIR}")
             env('JENKINS_AGENT_SHARED_METADATA_DIR', "${JENKINS_AGENT_SHARED_METADATA_DIR}")
           }
 

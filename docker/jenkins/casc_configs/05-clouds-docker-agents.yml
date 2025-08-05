@@ -58,6 +58,7 @@ jenkins:
                 # to the dind container’s filesystem.
                 #                - "type=bind,src=${JENKINS_AGENT_WORKSPACE_DIR}/SymbioDeployHub,dst=${JENKINS_AGENT_WORKSPACE_DIR}/SymbioDeployHub"
                 - "type=bind,src=${DOCKER_CERT_PATH},dst=${DOCKER_CERT_PATH},readonly"
+                - "type=bind,src=${JENKINS_AGENT_DOWNLOADS_DIR},dst=${JENKINS_AGENT_DOWNLOADS_DIR}"
                 - "type=bind,src=${JENKINS_AGENT_WORKSPACE_DIR},dst=${JENKINS_AGENT_WORKSPACE_DIR}"
               environment:
                 # This tells Docker CLI commands running inside the agent container where to find the Docker daemon.

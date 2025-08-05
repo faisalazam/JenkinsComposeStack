@@ -30,6 +30,7 @@ services:
       - JENKINS_SLAVE_AGENT_PORT=${JENKINS_SLAVE_AGENT_PORT}
       - JENKINS_JCASC_SECRETS_DIR=${JENKINS_JCASC_SECRETS_DIR}
       - JENKINS_AGENT_WORKSPACE_DIR=${JENKINS_AGENT_WORKSPACE_DIR}
+      - JENKINS_AGENT_DOWNLOADS_DIR=${JENKINS_AGENT_DOWNLOADS_DIR}
       - JENKINS_DOCKER_AGENT_IMAGE_PATH=${JENKINS_DOCKER_AGENT_IMAGE_PATH}
       - JENKINS_AGENT_SHARED_METADATA_DIR=${JENKINS_AGENT_SHARED_METADATA_DIR}
     volumes:
@@ -95,10 +96,12 @@ services:
       # Mounting the tomcat_downloads folder containing the tomcat upgrade zip files
       # The zip file will be copied manually to the jenkins server
       # scp -r -i ~/.ssh/remote_servers_rsa_pri ~/Downloads/tomcat_downloads muhammad.faisal@172.31.0.73:/tmp
-      - /tmp/tomcat_downloads:${JENKINS_AGENT_WORKSPACE_DIR}/tomcat_downloads
+      # But remember, if you recreate the /tmp/tomcat_downloads dir, the container won't see the new folder
+      # until restarted => docker compose restart dind
+      - /tmp/tomcat_downloads:${JENKINS_AGENT_DOWNLOADS_DIR}
       - ./certs/registry.crt:/usr/local/share/ca-certificates/registry.crt:ro
     # chown to ensure Jenkins agent can write to shared volume (owned by UID 1000, i.e. the Jenkins user)
-    command: sh -c "update-ca-certificates && chown -R 1000:1000 ${JENKINS_AGENT_WORKSPACE_DIR} ${JENKINS_AGENT_SHARED_METADATA_DIR} && dockerd-entrypoint.sh"
+    command: sh -c "update-ca-certificates && chown -R 1000:1000 ${JENKINS_AGENT_DOWNLOADS_DIR} ${JENKINS_AGENT_WORKSPACE_DIR} ${JENKINS_AGENT_SHARED_METADATA_DIR} && dockerd-entrypoint.sh"
     healthcheck:
       test: ["CMD", "sh", "-c", "docker version --format '{{.Server.Version}}' || exit 1"]
       interval: 5s
